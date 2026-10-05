@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Ch 9 Audio Lesson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea; --card:#fffdf8; --ink:#1d2b2a; --muted:#5f6f6d; --line:#e2ddd1;
+  --teal:#0f766e; --teal-soft:#d6ece9; --amber:#d97706; --amber-soft:#fdf0d8;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0f1716; --card:#16211f; --ink:#e7efed; --muted:#93a5a2; --line:#24312f;
+        --teal:#2dd4bf; --teal-soft:#123b37; --amber:#fbbf24; --amber-soft:#3a2c0f;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px 140px}
+header .eyebrow{color:var(--amber);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+h1{font-family:Fraunces,Georgia,serif;font-size:clamp(26px,6vw,38px);line-height:1.15;margin:6px 0 4px}
+header p{color:var(--muted);margin:0 0 18px}
+.player{position:sticky;top:0;z-index:5;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.06)}
+.now{font-weight:600;font-size:15px;margin-bottom:10px;min-height:1.5em}
+.now span{color:var(--teal)}
+.bar{position:relative;height:10px;background:var(--teal-soft);border-radius:99px;cursor:pointer;touch-action:none}
+.fill{position:absolute;inset:0 auto 0 0;background:var(--teal);border-radius:99px;width:0}
+.tick{position:absolute;top:-3px;width:2px;height:16px;background:var(--amber);opacity:.8}
+.times{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+.controls{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 12px;min-height:44px}
+button:hover{border-color:var(--teal)}
+.play{background:var(--teal);color:#fff;border:none;width:64px;height:64px;border-radius:50%;font-size:24px}
+@media (prefers-color-scheme: dark){.play{color:#062a26}}
+.seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{border:none;border-radius:0;min-width:44px}
+.seg button.on{background:var(--amber-soft);color:var(--amber);font-weight:600}
+.row2{display:flex;justify-content:space-between;gap:10px;margin-top:12px;flex-wrap:wrap}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:4px}
+h2{font-family:Fraunces,Georgia,serif;font-size:20px;margin:28px 0 10px}
+.parts{display:grid;gap:8px}
+.part{text-align:left;display:flex;gap:12px;align-items:center;padding:10px 14px;border-radius:14px}
+.part .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;min-width:44px}
+.part.on{background:var(--teal-soft);border-color:var(--teal)}
+.part.done .t::after{content:" ✓";color:var(--teal)}
+.tx section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin-bottom:10px;transition:.2s}
+.tx section.on{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-soft)}
+.tx h3{margin:0 0 6px;font-size:15px;color:var(--teal);cursor:pointer}
+.tx p{margin:0 0 4px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+footer{color:var(--muted);font-size:13px;margin-top:24px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">PTCE Audio Lesson</div>
+    <h1>Chapter 9 · Drug Classifications &amp; Formulations</h1>
+    <p>Listen in nine short parts. Your spot is saved, so you can pick up where you left off.</p>
+  </header>
+
+  <div class="player">
+    <div class="now" id="now">Ready</div>
+    <div class="bar" id="bar"><div class="fill" id="fill"></div></div>
+    <div class="times"><span id="cur">0:00</span><span id="dur">--:--</span></div>
+    <div class="controls">
+      <button id="prev" aria-label="Previous part">⏮</button>
+      <button id="back" aria-label="Back 15 seconds">↺ 15</button>
+      <button class="play" id="play" aria-label="Play">▶</button>
+      <button id="fwd" aria-label="Forward 15 seconds">30 ↻</button>
+      <button id="next" aria-label="Next part">⏭</button>
+    </div>
+    <div class="row2">
+      <div><div class="lbl">Narrator</div>
+        <div class="seg" id="voice"><button data-v="f">Female</button><button data-v="m">Male</button></div></div>
+      <div><div class="lbl">Speed</div>
+        <div class="seg" id="speed"><button data-s="0.85">0.85×</button><button data-s="1">1×</button><button data-s="1.15">1.15×</button><button data-s="1.3">1.3×</button></div></div>
+    </div>
+  </div>
+
+  <h2>Parts</h2>
+  <div class="parts" id="parts"></div>
+
+  <h2 style="display:flex;justify-content:space-between;align-items:center">Transcript
+    <label class="toggle"><input type="checkbox" id="follow" checked> Follow along</label></h2>
+  <div class="tx" id="tx"></div>
+  <footer>Keyboard: Space play/pause · ← → skip · N / P next/previous part</footer>
+</div>
+<audio id="a" preload="metadata"></audio>
+<script>
+const D = [{"t": "Introduction", "f": 0, "m": 0, "lines": ["Welcome to Chapter 9: Drug Classifications and Formulations.", "This lesson walks through the chapter in plain English, in eight short parts, with an exam review at the end."]}, {"t": "Part 1 \u00b7 Why this chapter matters", "f": 13.76, "m": 15.48, "lines": ["Part 1. Why this chapter matters.", "Medicines are powerful.", "The right drug, at the right dose, helps a patient.", "The wrong drug, or the wrong dose, can hurt them, and in some cases, even cause death.", "That is why this chapter matters.", "Pharmacists study drugs for four full years. You do not need all of that.", "Your goal as a technician is three things.", "First: given the brand or generic name of a common drug, know the other name, the drug category, the dosage forms, the common side effects, the important interactions, and how it is stored.", "Second: for a common disease, know the over-the-counter and prescription options.", "Third: looking at a patient's drug list, spot possible problems, such as interactions, drugs that should not be taken together, which are called contraindications, and side effects to watch for.", "The use of medicines to treat disease has a name. It is called pharmacotherapy.", "Keep that word in mind."]}, {"t": "Part 2 \u00b7 Building blocks of the body", "f": 77.84, "m": 85.84, "lines": ["Part 2. The building blocks of the body.", "Let's start small.", "The atom is the most basic unit of matter.", "It has a center, called the nucleus, with electrons circling around it, like planets around the Sun.", "The nucleus holds protons, which have a positive charge, and neutrons, which have no charge.", "The number of protons decides what the atom is. This is called the atomic number.", "Carbon has six protons. Add one more, and it becomes nitrogen, with seven.", "The atomic mass number is protons plus neutrons. Carbon's mass number is twelve.", "Here is a fact to remember.", "Ninety-six percent of your body is made of just four elements: oxygen, carbon, hydrogen, and nitrogen.", "When an atom has extra neutrons, it can become unstable and give off radiation.", "That is the idea behind radioactive medicines.", "When two or more atoms join, they make a molecule.", "Water is H two O: two hydrogen atoms and one oxygen atom.", "The body is built mostly from sugars, called carbohydrates; fats, called lipids; and proteins.", "Proteins that help chemical reactions happen are called enzymes.", "Proteins are built from twenty amino acids.", "A cell is the smallest living unit.", "Its nucleus holds DNA, packed into chromosomes.", "Each person has forty-six chromosomes in each cell, twenty-three from each parent.", "The sections of DNA that code for proteins are called genes."]}, {"t": "Part 3 \u00b7 Tour of the organ systems", "f": 175.22, "m": 192.99, "lines": ["Part 3. A tour of the organ systems.", "Cells group into tissues, tissues into organs, and organs that work together form organ systems.", "The body has eleven organ systems.", "Drugs are usually grouped by the organ system they treat, so this tour helps you sort drugs later.", "One. The integumentary system: the skin, hair, nails, and sweat glands.", "It protects the body, controls temperature, and makes a starter form of vitamin D when sunlight hits the skin.", "Skin has the thin outer epidermis, the thicker dermis under it, and the subcutaneous fat layer below.", "Skin is also a route for drugs, through injections under the skin, and through patches.", "Two. The skeletal system: bones, cartilage, and joints.", "Adults have two hundred and six bones.", "Bone marrow makes blood cells.", "Joints contain synovial fluid, which keeps them moving smoothly.", "Three. The muscular system has three muscle types.", "Skeletal muscle moves bones, and is voluntary. The nerve releases a chemical messenger called acetylcholine to tell it to move.", "Cardiac muscle makes the heartbeat on its own.", "Smooth muscle lines blood vessels, airways, and the bladder, and is involuntary.", "Four. The nervous system.", "The central nervous system, or C N S, is the brain and spinal cord.", "The peripheral nervous system is every nerve outside of that.", "Afferent nerves carry messages to the brain. Efferent nerves carry messages away from the brain.", "The somatic system is voluntary.", "The autonomic system is automatic, and it has two sides, sympathetic and parasympathetic, which usually do opposite things, like speeding up or slowing down the heart.", "Five. The endocrine system is made of glands that release hormones, the body's chemical messengers.", "The master glands are the hypothalamus and the pituitary.", "The pineal gland makes melatonin, which helps you sleep.", "The thyroid controls metabolism.", "The adrenal glands make cortisol, aldosterone, and adrenaline.", "The pancreas makes insulin, which lowers blood sugar, and glucagon, which raises it.", "Six. The cardiovascular system: the heart, blood vessels, and blood.", "The heart has four chambers and four valves.", "Arteries carry oxygen-rich blood away from the heart. Veins carry blood back. Tiny capillaries connect them.", "Blood has red blood cells that carry oxygen, white blood cells that fight infection, and platelets that help clotting.", "The liquid part is plasma. Plasma without clotting proteins is called serum.", "Seven. The lymphatic system fights infection and drains extra fluid.", "It makes T cells and B cells, and includes the lymph nodes, spleen, thymus, and tonsils.", "Eight. The respiratory system takes in oxygen and gets rid of carbon dioxide.", "The swap happens in tiny air sacs called alveoli.", "If carbon dioxide builds up, the blood becomes too acidic. So the lungs help keep the acid-base balance.", "Nine. The digestive system.", "Very little is absorbed in the acidic stomach. One exception is alcohol, which is why it acts so fast.", "Most drugs and nutrients are absorbed in the small intestine.", "The liver is the body's main chemical factory.", "It breaks down drugs using enzymes called the cytochrome P four fifty system.", "The gallbladder stores bile, which helps absorb fat.", "Ten. The urinary system: two kidneys, two ureters, the bladder, and the urethra.", "The kidneys filter the blood, balance electrolytes like sodium and potassium, help control blood pressure, and remove many drugs from the body.", "Eleven. The reproductive system.", "The ovaries make estrogen and progesterone. The testes make testosterone.", "The prostate gland helps make semen."]}, {"t": "Part 4 \u00b7 When something goes wrong", "f": 425.95, "m": 469.23, "lines": ["Part 4. When something goes wrong.", "If anatomy is a photo of the body, physiology is a movie. It is the study of how the body works.", "When everything is working in balance, we call it homeostasis.", "When that balance is disrupted, we call it disease.", "Disease can be caused by poisons; germs like bacteria, viruses, or fungi; lack of nutrients or oxygen; genetic problems; aging; or unknown causes.", "The study of what goes wrong in disease is called pathophysiology.", "Doctors make the diagnosis. Pharmacists are the treatment experts.", "As a technician, when a patient asks which over-the-counter product to use for a symptom, refer that question to the pharmacist.", "Risk factors are things about a person that raise their chances of a disease.", "Examples in your book: high blood pressure is more common in some families and populations; depression is more likely when close relatives have had it; and type 2 diabetes risk goes up with an inactive lifestyle, and with age.", "Pharmacogenomics means using a person's genes to choose drugs and doses.", "For example, a patient with fewer liver enzymes may break a drug down slowly, and need a lower dose.", "Now, a key exam point, and a tricky one.", "Your textbook defines signs as subjective clues, meaning what the patient describes, and symptoms as objective clues, meaning what the provider finds in an exam or lab test.", "Be careful. Most medical references define it the other way around: a symptom is what the patient feels, and a sign is what can be measured.", "For your course's module exam, follow your textbook. For other exams, know the standard definition.", "Epidemiology studies large groups of people, not single patients.", "Think of food poisoning at a big event. By comparing who ate what, investigators find the dish that caused it.", "Disease can be treated four ways: lifestyle changes; reducing risk factors like tobacco and alcohol; surgery; and pharmacotherapy, which is treatment with medicines."]}, {"t": "Part 5 \u00b7 Pharmacokinetics (ADME)", "f": 563.35, "m": 621.43, "lines": ["Part 5. Pharmacokinetics: how drugs move through the body.", "Pharmacokinetics is what the body does to the drug.", "It follows four steps. Remember them as A D M E: absorption, distribution, metabolism, and excretion.", "A is for absorption. This is how the drug gets into the blood.", "A tablet first breaks apart into small pieces. That is disintegration.", "Then the drug dissolves into the stomach and intestinal fluids. That is dissolution.", "Only then can it be absorbed.", "Intravenous drugs skip absorption completely, because they go straight into the blood.", "Bioavailability is the share of the dose that actually reaches the blood.", "If you take one gram, and point nine grams reaches the blood, the bioavailability is point nine, or ninety percent.", "Drugs absorbed from the gut go to the liver first.", "The liver may break down a big part of the dose before it ever reaches the rest of the body.", "This is called first-pass metabolism. High first-pass means low bioavailability.", "Sometimes it works the other way: an inactive drug becomes active in the liver. That kind of drug is called a prodrug.", "D is for distribution. This is how the drug travels through the blood into the tissues.", "A drug that moves heavily into fat has a large volume of distribution, and it tends to stay in the body a long time.", "M is for metabolism. This is how the body chemically changes the drug, mostly in the liver, using C Y P four fifty enzymes, such as three A four.", "Most metabolism turns an active drug into an inactive one.", "Many drug interactions happen here, when two drugs use the same enzyme.", "E is for excretion. This is how the drug leaves the body: mostly in urine or stool, and sometimes through the lungs.", "Clearance is how much drug is removed over time.", "Half-life is the time it takes for the drug level in the blood to drop by half.", "Alcohol is the perfect example of all four steps.", "It is absorbed fast from the stomach. It travels to the brain, where it slows things down. It is metabolized to acetaldehyde. And some leaves in the breath.", "That is why a breath test can estimate blood alcohol."]}, {"t": "Part 6 \u00b7 Pharmacodynamics & strengths", "f": 709.72, "m": 782.4, "lines": ["Part 6. Pharmacodynamics and strengths.", "Pharmacodynamics is the opposite view. It is what the drug does to the body.", "It links the drug level to the effect. Usually, more drug means more effect.", "Alcohol shows this clearly.", "At about fifty milligrams per deciliter, a person feels good.", "At one hundred, speech, balance, and reaction time start to slip.", "At one hundred fifty, there is severe motor impairment.", "Between one hundred fifty and two hundred fifty, nausea sets in.", "At about three hundred, the person passes out.", "At about four hundred: coma. And death can follow if breathing stops.", "Now, strength.", "The strength is the amount of drug in one unit, such as diazepam five milligram tablets, or amoxicillin suspension, one hundred fifty milligrams per five milliliters.", "Always pick the correct strength.", "Some drugs, like digoxin and warfarin, have a narrow therapeutic index.", "That means a dose that helps one patient can be toxic for another.", "Pharmacies often shelve different strengths of these drugs apart from each other, to prevent picking the wrong one."]}, {"t": "Part 7 \u00b7 Dosage forms", "f": 785.81, "m": 866.03, "lines": ["Part 7. Dosage forms.", "The dosage form is the shape a drug comes in. Here are the ones to know.", "Solids.", "True pills are rarely made today, so call them tablets or capsules.", "Tablets are compressed powder.", "They can be swallowed; chewed; placed under the tongue, which is sublingual; or placed between the cheek and gum, which is buccal.", "Never crush timed-release, controlled-release, or delayed-release tablets, unless the label says it is okay.", "Capsules are gelatin shells, and they are the cheapest and easiest solid form to make.", "Liquids.", "In a solution, the drug is fully dissolved, so it is clear, though not always colorless.", "A suspension has tiny particles floating in liquid. It is never clear, and it must be shaken well before measuring a dose.", "Syrups are sweetened. Elixirs contain alcohol.", "Topicals.", "Creams are water-based, and wash off easily. Ointments are oil-based, and resist water.", "They are not interchangeable, so dispense exactly what was prescribed.", "Lotions are emulsions with two phases: water and oil.", "Transdermal patches deliver drug through the skin.", "If a patient asks whether a patch can be cut, check with the pharmacist.", "Suppositories stay solid at room temperature, and melt inside the body.", "They are used rectally, vaginally, and rarely, in the urethra.", "They help patients who are vomiting and cannot keep a tablet down.", "Injectables.", "Most injectable drugs are sterile solutions.", "Injectable suspensions are given only into the muscle. Never into a vein or artery, because the particles can block tiny blood vessels, and cause serious harm, or death.", "Some long-acting depot injections last three to four weeks.", "Injectable lipid emulsions provide fat to patients fed through the vein."]}, {"t": "Part 8 \u00b7 Drug names, categories & safety", "f": 908.74, "m": 1001.49, "lines": ["Part 8. Drug names, categories, and safety.", "Every drug has two kinds of names.", "The generic name is given by the United States Adopted Names program, called U-SAN.", "By law, it must appear on the label at least half the size of the brand name.", "The brand name, also called the trade or proprietary name, is chosen by the company.", "For example, Premarin comes from pregnant mare's urine.", "Generic names give you clues. Drugs in the same class often share an ending.", "Statins end in statin, like atorvastatin, and they lower cholesterol.", "ACE inhibitors end in pril, like lisinopril.", "A R Bs end in sartan, like losartan.", "Beta blockers end in olol, like metoprolol.", "Proton pump inhibitors end in prazole, like omeprazole.", "Benzodiazepines often end in pam or lam, like diazepam and alprazolam.", "S S R I antidepressants include sertraline and fluoxetine.", "Here are some drugs your textbook flags as important.", "Benzodiazepines are controlled substances, and long use can lead to dependence.", "S S R Is can take four to six weeks to work, and should be stopped slowly.", "Warfarin interacts with many drugs, and bleeding is the main risk of all blood thinners.", "Metformin, for type 2 diabetes, should be avoided in kidney disease.", "Statins: patients should avoid grapefruit juice, and report muscle pain.", "Fluoroquinolone antibiotics, like ciprofloxacin, can cause tendon rupture.", "Metronidazole: no alcohol during treatment, and for three days after.", "Sulfamethoxazole with trimethoprim, known as Bactrim, contains sulfa, so it cannot be used with a sulfa allergy.", "Alendronate must be taken with a full glass of water, and the patient must not lie down afterward.", "Naloxone nasal spray reverses an opioid overdose. One spray in one nostril. Call nine one one, and give a second spray in the other nostril if there is no response.", "Common uses.", "The F D A approves certain uses, called approved indications.", "When a prescriber uses a drug for something else, it is called off-label use.", "Adverse effects, also called side effects, happen at normal doses.", "Toxic effects happen when too much drug is given.", "A contraindication means a drug should not be used in a certain patient.", "For example, decongestants can raise blood pressure and blood sugar, so patients with high blood pressure or diabetes should check with their doctor first.", "Allergy is another contraindication.", "Cross-sensitivity means a patient allergic to one drug may react to similar drugs, like the penicillins.", "Precautions mean use with care, especially in pregnancy, newborns, children, the elderly, and patients with liver or kidney disease.", "Storage temperatures are a must-know.", "Frozen is below zero degrees Celsius, or thirty-two Fahrenheit.", "Refrigerated is two to eight degrees Celsius, or thirty-six to forty-six Fahrenheit.", "Room temperature is fifteen to thirty degrees Celsius, or fifty-nine to eighty-six Fahrenheit.", "If a patient says a drug changed color, it may have been left in a hot car.", "Drug interactions.", "One drug can block the absorption of another. For example, antacids bind fluoroquinolone antibiotics.", "Most interactions happen in the liver.", "Some drugs speed up an enzyme, which is called inducing. Others slow it down, which is called inhibiting.", "Erythromycin inhibits C Y P three A four, so it can raise carbamazepine levels to toxic amounts.", "Food and herbal products can interact too.", "The pharmacist, with your help, screens for these."]}, {"t": "Part 9 \u00b7 Exam review", "f": 1152.23, "m": 1270.45, "lines": ["Part 9. Exam review.", "Here is your quick exam review.", "Pharmacotherapy is treating disease with medicines.", "Ninety-six percent of the body is oxygen, carbon, hydrogen, and nitrogen.", "There are eleven organ systems, and two hundred and six bones.", "Insulin lowers blood sugar. Glucagon raises it. Both come from the pancreas.", "Homeostasis is balance.", "Pathophysiology is the study of what goes wrong.", "Epidemiology studies large groups.", "In your textbook, signs are what the patient describes, and symptoms are what the provider finds. Standard medical references reverse these.", "Pharmacokinetics is what the body does to the drug: absorption, distribution, metabolism, excretion.", "Pharmacodynamics is what the drug does to the body.", "Bioavailability is the fraction of a dose that reaches the blood.", "Intravenous drugs skip absorption.", "First-pass metabolism happens in the liver.", "A prodrug is inactive until the body activates it.", "Half-life is the time for the drug level to drop by half.", "Narrow therapeutic index drugs include digoxin and warfarin.", "Suspensions: never put injectable suspensions into a vein.", "Do not crush extended-release tablets.", "Creams are water-based. Ointments are oil-based.", "Refrigerator: two to eight degrees Celsius.", "Room temperature: fifteen to thirty degrees Celsius.", "Freezer: below zero degrees Celsius.", "That's the end of Chapter 9: Drug Classifications and Formulations.", "Try the quiz next. Good luck. You've got this."]}];
+const SRC = {f:"Ch9_Drug_Classifications_Narrated_Female.mp3", m:"Ch9_Drug_Classifications_Narrated_Male.mp3"};
+const $ = id => document.getElementById(id);
+const a = $("a");
+const store = {get(k,d){try{const v=localStorage.getItem("ch9:"+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+               set(k,v){try{localStorage.setItem("ch9:"+k,JSON.stringify(v))}catch(e){}}};
+let voice = store.get("voice","f"), speed = store.get("speed",1), done = new Set(store.get("done",[]));
+const fmt = s => isFinite(s) ? Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0") : "--:--";
+const starts = () => D.map(d => d[voice]);
+const partAt = t => { const s = starts(); let i = 0; s.forEach((v,k)=>{ if (t >= v - 0.2) i = k; }); return i; };
+
+// build parts list + transcript
+$("parts").innerHTML = D.map((d,i)=>`<button class="part" data-i="${i}"><span class="n" id="pn${i}"></span><span class="t">${d.t}</span></button>`).join("");
+$("tx").innerHTML = D.map((d,i)=>`<section id="s${i}"><h3 data-i="${i}">${d.t}</h3>${d.lines.map(l=>`<p>${l.replace(/</g,"&lt;")}</p>`).join("")}</section>`).join("");
+function labelParts(){ D.forEach((d,i)=>{ $("pn"+i).textContent = fmt(d[voice]); $("parts").children[i].classList.toggle("done", done.has(i)); }); }
+function ticks(){ document.querySelectorAll(".tick").forEach(e=>e.remove()); if(!a.duration) return;
+  starts().slice(1).forEach(s=>{ const t=document.createElement("div"); t.className="tick"; t.style.left=(s/a.duration*100)+"%"; $("bar").appendChild(t); }); }
+
+function setVoice(v, keepPart=true){
+  const wasPlaying = !a.paused; const i = partAt(a.currentTime||0);
+  const offset = (a.currentTime||0) - (a.src ? starts()[i] : 0);
+  voice = v; store.set("voice", v);
+  a.src = SRC[v]; a.playbackRate = speed;
+  const target = keepPart && a.dataset.ready ? D[i][v] + Math.max(0, offset) : store.get("pos_"+v, 0);
+  a.addEventListener("loadedmetadata", () => { a.currentTime = target; a.playbackRate = speed; ticks(); if (wasPlaying) a.play(); }, {once:true});
+  a.dataset.ready = 1;
+  document.querySelectorAll("#voice button").forEach(b=>b.classList.toggle("on", b.dataset.v===v));
+  labelParts();
+}
+function setSpeed(s){ speed = +s; a.playbackRate = speed; store.set("speed", speed);
+  document.querySelectorAll("#speed button").forEach(b=>b.classList.toggle("on", +b.dataset.s===speed)); }
+function go(i){ i = Math.max(0, Math.min(D.length-1, i)); a.currentTime = D[i][voice]; a.play(); }
+
+let last = -1;
+a.addEventListener("timeupdate", () => {
+  const t = a.currentTime; $("cur").textContent = fmt(t);
+  $("fill").style.width = (t / (a.duration||1) * 100) + "%";
+  const i = partAt(t);
+  if (i !== last) {
+    if (last >= 0 && i > last) { done.add(last); store.set("done", [...done]); }
+    last = i;
+    document.querySelectorAll(".part").forEach((b,k)=>b.classList.toggle("on", k===i));
+    document.querySelectorAll(".tx section").forEach((s,k)=>s.classList.toggle("on", k===i));
+    $("now").innerHTML = `Now playing: <span>${D[i].t}</span>`;
+    if ($("follow").checked && !a.paused) $("s"+i).scrollIntoView({behavior:"smooth", block:"center"});
+    labelParts();
+  }
+  store.set("pos_"+voice, t);
+});
+a.addEventListener("loadedmetadata", () => { $("dur").textContent = fmt(a.duration); });
+a.addEventListener("play", () => { $("play").textContent = "❚❚"; $("play").setAttribute("aria-label","Pause"); });
+a.addEventListener("pause", () => { $("play").textContent = "▶"; $("play").setAttribute("aria-label","Play"); });
+a.addEventListener("ended", () => { done.add(D.length-1); store.set("done",[...done]); labelParts(); });
+
+$("play").onclick = () => a.paused ? a.play() : a.pause();
+$("back").onclick = () => a.currentTime = Math.max(0, a.currentTime - 15);
+$("fwd").onclick = () => a.currentTime = Math.min(a.duration||0, a.currentTime + 30);
+$("prev").onclick = () => { const i = partAt(a.currentTime); go(a.currentTime - D[i][voice] > 3 ? i : i-1); };
+$("next").onclick = () => go(partAt(a.currentTime)+1);
+$("voice").onclick = e => { const v = e.target.dataset.v; if (v && v !== voice) setVoice(v); };
+$("speed").onclick = e => { if (e.target.dataset.s) setSpeed(e.target.dataset.s); };
+$("parts").onclick = e => { const b = e.target.closest(".part"); if (b) go(+b.dataset.i); };
+$("tx").onclick = e => { if (e.target.tagName === "H3") go(+e.target.dataset.i); };
+function seek(e){ const r = $("bar").getBoundingClientRect(); a.currentTime = Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)) * (a.duration||0); }
+$("bar").addEventListener("pointerdown", e => { seek(e); $("bar").setPointerCapture(e.pointerId); $("bar").onpointermove = seek; });
+$("bar").addEventListener("pointerup", () => $("bar").onpointermove = null);
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.code === "Space") { e.preventDefault(); $("play").click(); }
+  else if (e.key === "ArrowLeft") $("back").click();
+  else if (e.key === "ArrowRight") $("fwd").click();
+  else if (e.key.toLowerCase() === "n") $("next").click();
+  else if (e.key.toLowerCase() === "p") $("prev").click();
+});
+if ("mediaSession" in navigator) {
+  navigator.mediaSession.metadata = new MediaMetadata({title:"Ch 9 · Drug Classifications & Formulations", artist:"PTCE Audio Lesson"});
+  navigator.mediaSession.setActionHandler("previoustrack", () => $("prev").click());
+  navigator.mediaSession.setActionHandler("nexttrack", () => $("next").click());
+  navigator.mediaSession.setActionHandler("seekbackward", () => $("back").click());
+  navigator.mediaSession.setActionHandler("seekforward", () => $("fwd").click());
+}
+setSpeed(speed); setVoice(voice, false);
+</script>
+</body>
+</html>
